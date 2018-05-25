@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>de.skymatic</groupId>
+	<artifactId>javafx11-test</artifactId>
+	<version>1.0.0</version>
+
+	<dependencies>
+		<dependency>
+			<groupId>javafx</groupId>
+			<artifactId>javafx-base</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/javafx/lib/javafx.base.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>javafx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/javafx/lib/javafx.graphics.jar</systemPath>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>9</source>
+					<target>9</target>
+					<release>9</release>
+				</configuration>
+			</plugin>
+
+			<!-- jlink -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<id>create-custom-runtime</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${java.home}/bin/jlink</executable>
+							<workingDirectory>${project.build.directory}</workingDirectory>
+							<longModulepath>false</longModulepath> <!-- fix for https://github.com/mojohaus/exec-maven-plugin/issues/75 -->
+							<arguments>
+								<argument>--module-path</argument>
+								<argument>${java.home}/jmods:${project.basedir}/javafx/lib/:${project.build.outputDirectory}</argument>
+								<argument>--verbose</argument>
+								<argument>--compress</argument>
+								<argument>1</argument>
+								<argument>--no-header-files</argument>
+								<argument>--strip-debug</argument>
+								<argument>--no-man-pages</argument>
+								<argument>--output</argument>
+								<argument>Runtime</argument>
+								<argument>--add-modules</argument>
+								<argument>de.skymatic.javafx11test</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- add .dylibs (for win or linux change to .so, .dll) -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/Runtime/lib</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.basedir}/javafx/lib/</directory>
+									<includes>
+										<include>*.dylib</include>
+									</includes>
+									<excludes>
+										<exclude>libjfxwebkit.dylib</exclude>
+									</excludes>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
