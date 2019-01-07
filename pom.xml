@@ -10,6 +10,7 @@
 
 	<properties>
 		<javafx.version>11.0.1</javafx.version>
+		<jpackager.path>/Users/sebastian/Desktop/jdk.packager-osx/jpackager</jpackager.path>
 	</properties>
 
 	<dependencies>
@@ -48,37 +49,41 @@
 				</executions>
 			</plugin>
 
-			<!-- jlink -->
+			<!-- jpackage -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.6.0</version>
 				<executions>
 					<execution>
-						<id>create-custom-runtime</id>
+						<id>create-package</id>
 						<phase>package</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
 						<configuration>
-							<executable>${java.home}/bin/jlink</executable>
+							<executable>${jpackager.path}</executable>
 							<workingDirectory>${project.build.directory}</workingDirectory>
 							<longModulepath>false</longModulepath> <!-- fix for https://github.com/mojohaus/exec-maven-plugin/issues/75 -->
+							<environmentVariables>
+								<JAVA_HOME>${java.home}</JAVA_HOME>
+							</environmentVariables>
 							<arguments>
+								<argument>create-image</argument>
+								<argument>--verbose</argument>
+								<argument>--output</argument>
+								<argument>package</argument>
+								<argument>--module</argument>
+								<argument>de.skymatic.javafx11test/de.skymatic.javafx11test.Main</argument>
 								<argument>--module-path</argument>
 								<argument>${java.home}/jmods:${project.build.directory}/libs:${project.build.outputDirectory}</argument>
-								<argument>--verbose</argument>
-								<argument>--compress</argument>
-								<argument>2</argument>
-								<argument>--no-header-files</argument>
-								<argument>--strip-debug</argument>
-								<argument>--no-man-pages</argument>
-								<argument>--output</argument>
-								<argument>runtime</argument>
-								<argument>--add-modules</argument>
+								<argument>--strip-native-commands</argument>
+								<argument>--identifier</argument>
 								<argument>de.skymatic.javafx11test</argument>
-								<argument>--launcher</argument>
-								<argument>command=de.skymatic.javafx11test/de.skymatic.javafx11test.Main</argument>
+								<argument>--vendor</argument>
+								<argument>Skymatic</argument>
+								<argument>--name</argument>
+								<argument>JavaFX11Test</argument>
 							</arguments>
 						</configuration>
 					</execution>
