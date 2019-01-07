@@ -32,6 +32,13 @@
 			</plugin>
 
 			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<outputDirectory>${project.build.directory}/libs</outputDirectory>
+				</configuration>
+			</plugin>
+
+			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>3.1.0</version>
 				<executions>
@@ -44,6 +51,19 @@
 						<configuration>
 							<outputDirectory>${project.build.directory}/libs</outputDirectory>
 							<includeScope>runtime</includeScope>
+							<excludeGroupIds>org.openjfx</excludeGroupIds>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-modules</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/mods</outputDirectory>
+							<includeScope>runtime</includeScope>
+							<includeGroupIds>org.openjfx</includeGroupIds>
 						</configuration>
 					</execution>
 				</executions>
@@ -69,21 +89,29 @@
 								<JAVA_HOME>${java.home}</JAVA_HOME>
 							</environmentVariables>
 							<arguments>
+								<!-- packager arguments -->
 								<argument>create-image</argument>
 								<argument>--verbose</argument>
+								<argument>--echo-mode</argument>
+								<argument>--input</argument>
+								<argument>${project.build.directory}/libs</argument>
+								<argument>--class</argument>
+								<argument>de.skymatic.javafx11test.Main</argument>
+								<argument>--main-jar</argument>
+								<argument>./javafx11-test-1.0.0.jar</argument>
 								<argument>--output</argument>
 								<argument>package</argument>
-								<argument>--module</argument>
-								<argument>de.skymatic.javafx11test/de.skymatic.javafx11test.Main</argument>
-								<argument>--module-path</argument>
-								<argument>${java.home}/jmods:${project.build.directory}/libs:${project.build.outputDirectory}</argument>
-								<argument>--strip-native-commands</argument>
 								<argument>--identifier</argument>
 								<argument>de.skymatic.javafx11test</argument>
-								<argument>--vendor</argument>
-								<argument>Skymatic</argument>
 								<argument>--name</argument>
 								<argument>JavaFX11Test</argument>
+
+								<!-- jlink arguments -->
+								<argument>--module-path</argument>
+								<argument>${java.home}/jmods:${project.build.directory}/mods</argument>
+								<argument>--add-modules</argument>
+								<argument>java.base,java.desktop,java.xml,jdk.unsupported,javafx.base,javafx.graphics</argument>
+								<argument>--strip-native-commands</argument>
 							</arguments>
 						</configuration>
 					</execution>
